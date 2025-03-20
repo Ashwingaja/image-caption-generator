@@ -1,0 +1,32 @@
+pip install gradio transformers torch
+import gradio as gr
+from transformers import BlipProcessor, BlipForConditionalGeneration
+from PIL import Image
+
+Load pre-trained model and processor
+
+processor = BlipProcessor.from_pretrained("Salesforce/blip-image-captioning-base")
+model = BlipForConditionalGeneration.from_pretrained("Salesforce/blip-image-captioning-base")
+
+Function to generate captions
+
+def generate_caption(image):
+img = Image.open(image).convert("RGB")
+inputs = processor(img, return_tensors="pt")
+caption_ids = model.generate(**inputs)
+caption = processor.decode(caption_ids[0], skip_special_tokens=True)
+return caption
+
+Create Gradio Interface
+
+interface = gr.Interface(
+fn=generate_caption,
+inputs=gr.Image(type="filepath")
+outputs="text",
+title="Image Caption Generator",
+description="Upload an image and get an AI-generated caption."
+)
+
+Launch the app
+
+interface.launch()
